@@ -1,0 +1,47 @@
+import os
+import openai
+from dotenv import load_dotenv
+import tkinter as tk
+from tkinter import scrolledtext, messagebox
+
+# Load your OpenAI API key from the .env file
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")  # Make sure the key is named correctly in the .env file
+
+# Function to call the OpenAI completion endpoint
+def get_completion():
+    prompt = prompt_text.get("1.0", tk.END).strip()
+    if not prompt:
+        messagebox.showwarning("Input Error", "Please enter a prompt.")
+        return
+    try:
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            max_tokens=150,
+            temperature=0.7,
+        )
+        output = response.choices[0].text.strip()
+        output_text.config(state=tk.NORMAL)
+        output_text.delete("1.0", tk.END)
+        output_text.insert(tk.END, output)
+        output_text.config(state=tk.DISABLED)
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+# Build the GUI
+root = tk.Tk()
+root.title("OpenAI Completion GUI")
+
+tk.Label(root, text="Enter your prompt:").pack(padx=10, pady=(10, 0))
+prompt_text = scrolledtext.ScrolledText(root, wrap=tk.WORD, height=6)
+prompt_text.pack(padx=10, pady=(0, 10), fill=tk.BOTH)
+
+submit_btn = tk.Button(root, text="Submit", command=get_completion)
+submit_btn.pack(pady=(0, 10))
+
+tk.Label(root, text="Output:").pack(padx=10)
+output_text = scrolledtext.ScrolledText(root, wrap=tk.WORD, height=10, state=tk.DISABLED)
+output_text.pack(padx=10, pady=(0, 10), fill=tk.BOTH)
+
+root.mainloop()
